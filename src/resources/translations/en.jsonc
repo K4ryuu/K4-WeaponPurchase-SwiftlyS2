@@ -1,0 +1,71 @@
+{
+  // General
+  "k4.general.prefix": "[silver][ [lime]K4-WeaponPurchase [silver]]",
+
+  // Error messages
+  "k4.weaponpurchase.dead": "[lightred]You can't buy weapons while you're dead!",
+  "k4.weaponpurchase.not_enough_money": "[lightred]You don't have enough money to buy this weapon! ([gold]{0}$[lightred] needed)",
+  "k4.weaponpurchase.grenade_limit": "[lightred]You can't carry any more grenades! (Limit: [gold]{0}[lightred])",
+  "k4.weaponpurchase.flashbang_limit": "[lightred]You can't carry any more flashbangs! (Limit: [gold]{0}[lightred])",
+  "k4.weaponpurchase.default_limit": "[lightred]You can't carry any more of this grenade type! (Limit: [gold]{0}[lightred])",
+  "k4.weaponpurchase.healthshot_limit": "[lightred]You can't carry any more healthshots! (Limit: [gold]{0}[lightred])",
+  "k4.weaponpurchase.not_in_buyzone": "[lightred]You need to be in a buy zone to buy weapons!",
+  "k4.weaponpurchase.buytime_ended": "[lightred]Buy time has ended, you can't buy weapons anymore!",
+
+  // Success message
+  "k4.weaponpurchase.purchase_success": "[silver]You have successfully purchased a [lime]{0}[silver] for [lime]{1}$[silver]!",
+
+  // Weapon display names - Rifles
+  "k4.weapon.m4a1_silencer": "M4A1-S",
+  "k4.weapon.ssg08": "SSG 08",
+  "k4.weapon.sg556": "SG 553",
+  "k4.weapon.scar20": "SCAR-20",
+  "k4.weapon.nova": "Nova",
+  "k4.weapon.mp9": "MP9",
+  "k4.weapon.mp7": "MP7",
+  "k4.weapon.sawedoff": "Sawed-Off",
+  "k4.weapon.negev": "Negev",
+  "k4.weapon.mag7": "MAG-7",
+  "k4.weapon.bizon": "PP-Bizon",
+  "k4.weapon.xm1014": "XM1014",
+  "k4.weapon.ump45": "UMP-45",
+  "k4.weapon.mp5sd": "MP5-SD",
+  "k4.weapon.p90": "P90",
+  "k4.weapon.mac10": "MAC-10",
+  "k4.weapon.m4a1": "M4A4",
+  "k4.weapon.m249": "M249",
+  "k4.weapon.galilar": "Galil AR",
+  "k4.weapon.g3sg1": "G3SG1",
+  "k4.weapon.famas": "FAMAS",
+  "k4.weapon.awp": "AWP",
+  "k4.weapon.aug": "AUG",
+  "k4.weapon.ak47": "AK-47",
+
+  // Weapon display names - Pistols
+  "k4.weapon.revolver": "R8 Revolver",
+  "k4.weapon.cz75a": "CZ75-Auto",
+  "k4.weapon.usp_silencer": "USP-S",
+  "k4.weapon.p250": "P250",
+  "k4.weapon.hkp2000": "P2000",
+  "k4.weapon.tec9": "Tec-9",
+  "k4.weapon.glock": "Glock-18",
+  "k4.weapon.fiveseven": "Five-SeveN",
+  "k4.weapon.elite": "Dual Berettas",
+  "k4.weapon.deagle": "Desert Eagle",
+
+  // Weapon display names - Utility
+  "k4.weapon.taser": "Taser",
+  "k4.weapon.shield": "Shield",
+  "k4.weapon.healthshot": "Healthshot",
+  "k4.weapon.kevlar": "Kevlar Vest",
+  "k4.weapon.assaultsuit": "Kevlar + Helmet",
+
+  // Weapon display names - Grenades
+  "k4.weapon.flashbang": "Flashbang",
+  "k4.weapon.smokegrenade": "Smoke Grenade",
+  "k4.weapon.molotov": "Molotov",
+  "k4.weapon.hegrenade": "HE Grenade",
+  "k4.weapon.incgrenade": "Incendiary Grenade",
+  "k4.weapon.decoy": "Decoy Grenade",
+  "k4.weapon.tagrenade": "Tactical Grenade"
+}
