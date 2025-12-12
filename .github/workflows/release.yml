@@ -61,25 +61,26 @@ jobs:
           dotnet restore "$PROJECT"
           dotnet publish "$PROJECT" -c Release
 
-      - name: Create release zip
+      - name: Find release zip
         id: zip
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           REPO_NAME="${{ github.event.repository.name }}"
-          ZIP_NAME="${REPO_NAME}-v${VERSION}.zip"
 
-          # Validate build folder exists and has content
-          if [ ! -d "build" ] || [ -z "$(ls -A build)" ]; then
-            echo "::error::build/ folder is empty or missing"
+          # Find the zip created by dotnet publish (csproj CreateZip target)
+          ZIP_FILE=$(find . -name "*.zip" -type f | head -1)
+
+          if [ -z "$ZIP_FILE" ] || [ ! -f "$ZIP_FILE" ]; then
+            echo "::error::No .zip file found after build"
             exit 1
           fi
 
-          cd build
-          zip -r "../${ZIP_NAME}" .
-          cd ..
+          # Rename to standard format
+          ZIP_NAME="${REPO_NAME}-v${VERSION}.zip"
+          mv "$ZIP_FILE" "$ZIP_NAME"
 
           echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
-          echo "Created: $ZIP_NAME"
+          echo "Found and renamed to: $ZIP_NAME"
 
       - name: Extract changelog
         id: changelog
