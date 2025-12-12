@@ -25,8 +25,8 @@ jobs:
       - name: Extract version from PluginMetadata
         id: version
         run: |
-          # Find Version in any .cs file (supports pre-release: 1.0.1-beta, 2.0.0-rc.1)
-          VERSION=$(grep -rh 'Version\s*=\s*"' --include="*.cs" | sed -n 's/.*Version\s*=\s*"\([0-9]*\.[0-9]*\.[0-9]*\(-[a-zA-Z0-9.]*\)*\)".*/\1/p' | head -1)
+          # Find Version = "x.y.z" in any .cs file
+          VERSION=$(grep -roh 'Version *= *"[^"]*"' --include="*.cs" | head -1 | sed 's/.*"\(.*\)".*/\1/')
 
           if [ -z "$VERSION" ]; then
             echo "::error::Could not find PluginMetadata Version"
@@ -45,8 +45,21 @@ jobs:
 
       - name: Restore and Publish
         run: |
-          dotnet restore
-          dotnet publish -c Release
+          # Find solution or project file
+          if [ -f *.sln ]; then
+            PROJECT=$(ls *.sln | head -1)
+          else
+            PROJECT=$(find . -name "*.csproj" | head -1)
+          fi
+
+          if [ -z "$PROJECT" ]; then
+            echo "::error::No .sln or .csproj found"
+            exit 1
+          fi
+
+          echo "Building: $PROJECT"
+          dotnet restore "$PROJECT"
+          dotnet publish "$PROJECT" -c Release
 
       - name: Create release zip
         id: zip
