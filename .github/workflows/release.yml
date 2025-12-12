@@ -25,11 +25,11 @@ jobs:
       - name: Extract version from PluginMetadata
         id: version
         run: |
-          # Find Version in PluginMetadata attribute (supports pre-release: 1.0.1-beta, 2.0.0-rc.1)
-          VERSION=$(grep -rhoP 'PluginMetadata\s*\([^)]*Version\s*=\s*"\K[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?' --include="*.cs" | head -1)
+          # Find Version in any .cs file (supports pre-release: 1.0.1-beta, 2.0.0-rc.1)
+          VERSION=$(grep -rh 'Version\s*=\s*"' --include="*.cs" | sed -n 's/.*Version\s*=\s*"\([0-9]*\.[0-9]*\.[0-9]*\(-[a-zA-Z0-9.]*\)*\)".*/\1/p' | head -1)
 
           if [ -z "$VERSION" ]; then
-            echo "Could not find PluginMetadata Version"
+            echo "::error::Could not find PluginMetadata Version"
             exit 1
           fi
 
