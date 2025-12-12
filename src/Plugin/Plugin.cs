@@ -27,16 +27,16 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 	public override void Load(bool hotReload)
 	{
 		Core.Configuration
-		.InitializeJsonWithModel<PluginConfig>(ConfigFileName, ConfigSection)
-		.Configure(builder =>
-		{
-			builder.AddJsonFile(ConfigFileName, optional: false, reloadOnChange: true);
-		});
+			.InitializeJsonWithModel<PluginConfig>(ConfigFileName, ConfigSection)
+			.Configure(builder =>
+			{
+				builder.AddJsonFile(ConfigFileName, optional: false, reloadOnChange: true);
+			});
 
 		ServiceCollection services = new();
 		services.AddSwiftly(Core)
-			.AddOptions<PluginConfig>()
-			.BindConfiguration(ConfigFileName);
+			.AddOptionsWithValidateOnStart<PluginConfig>()
+			.BindConfiguration(ConfigSection);
 
 		var provider = services.BuildServiceProvider();
 		Config = provider.GetRequiredService<IOptionsMonitor<PluginConfig>>();
