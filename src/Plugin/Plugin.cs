@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Commands;
-using SwiftlyS2.Shared.GameEventDefinitions;
-using SwiftlyS2.Shared.Misc;
 using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.Plugins;
 using SwiftlyS2.Shared.SchemaDefinitions;
@@ -12,30 +12,36 @@ namespace K4WeaponPurchase;
 
 [PluginMetadata(
 	Id = "k4.weaponpurchase",
-	Version = "1.0.0",
+	Version = "1.0.1",
 	Name = "K4 - Weapon Purchase",
 	Author = "K4ryuu",
 	Description = "Purchase weapons, grenades and more through commands"
 )]
 public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 {
-	private PluginConfig _config = null!;
-	private CCSGameRules? _gameRules;
+	private const string ConfigFileName = "k4-weaponpurchase.jsonc";
+	private const string ConfigSection = "K4WeaponPurchase";
+
+	public static IOptionsMonitor<PluginConfig> Config { get; private set; } = null!;
 
 	public override void Load(bool hotReload)
 	{
-		const string ConfigFileName = "k4-weaponpurchase.jsonc";
-		const string ConfigSection = "K4WeaponPurchase";
-
 		Core.Configuration
-			.InitializeJsonWithModel<PluginConfig>(ConfigFileName, ConfigSection)
-			.Configure(cfg => cfg.AddJsonFile(Core.Configuration.GetConfigPath(ConfigFileName), optional: false, reloadOnChange: false));
+		.InitializeJsonWithModel<PluginConfig>(ConfigFileName, ConfigSection)
+		.Configure(builder =>
+		{
+			builder.AddJsonFile(ConfigFileName, optional: false, reloadOnChange: true);
+		});
 
-		_config = Core.Configuration.Manager.GetSection(ConfigSection).Get<PluginConfig>() ?? new PluginConfig();
+		ServiceCollection services = new();
+		services.AddSwiftly(Core)
+			.AddOptions<PluginConfig>()
+			.BindConfiguration(ConfigFileName);
 
-		Core.GameEvent.HookPost<EventRoundStart>(OnRoundStart);
+		var provider = services.BuildServiceProvider();
+		Config = provider.GetRequiredService<IOptionsMonitor<PluginConfig>>();
 
-		foreach (var (className, weaponConfig) in _config.Weapons)
+		foreach (var (className, weaponConfig) in Config.CurrentValue.Weapons)
 		{
 			foreach (var alias in weaponConfig.Aliases)
 			{
@@ -47,15 +53,6 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 	public override void Unload()
 	{
 		// Nothing to clean up
-	}
-
-	private HookResult OnRoundStart(EventRoundStart @event)
-	{
-		_gameRules = Core.EntitySystem
-			.GetAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
-			.FirstOrDefault()?.GameRules;
-
-		return HookResult.Continue;
 	}
 
 	private void OnPurchaseCommand(ICommandContext ctx, string className)
@@ -80,14 +77,14 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 		}
 
 		// Check buy zone
-		if (_config.CheckBuyZone && !pawn.InBuyZone)
+		if (Config.CurrentValue.CheckBuyZone && !pawn.InBuyZone)
 		{
 			player.SendChat($" {localizer["k4.general.prefix"]} {localizer["k4.weaponpurchase.not_in_buyzone"]}");
 			return;
 		}
 
 		// Check buy time
-		if (_config.CheckBuyTime && _gameRules?.BuyTimeEnded == true)
+		if (Config.CurrentValue.CheckBuyTime && Core.EntitySystem.GetGameRules()?.BuyTimeEnded == true)
 		{
 			player.SendChat($" {localizer["k4.general.prefix"]} {localizer["k4.weaponpurchase.buytime_ended"]}");
 			return;
@@ -109,7 +106,7 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 		}
 
 		// Get price (custom or default from game data)
-		var weaponConfig = _config.Weapons[className];
+		var weaponConfig = Config.CurrentValue.Weapons[className];
 		var price = weaponConfig.CustomPrice ?? weaponData.Price;
 
 		// Check money
