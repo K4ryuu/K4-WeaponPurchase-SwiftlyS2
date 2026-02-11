@@ -30,6 +30,8 @@
 - **Full Weapon Support** - All CS2 weapons including rifles, SMGs, shotguns, pistols, grenades, and utility items
 - **Configurable Aliases** - Multiple command aliases per weapon (e.g., `!ak` or `!ak47`)
 - **Custom Pricing** - Override default weapon prices in configuration
+- **Map Restrictions** - Whitelist or blacklist weapons on specific maps
+- **Team Restrictions** - Limit weapons to specific teams (T/CT)
 - **Buy Zone Check** - Optional enforcement of buy zone requirement
 - **Buy Time Check** - Optional enforcement of buy time restriction
 - **Grenade Limits** - Respects game's grenade carry limits
@@ -82,10 +84,25 @@ Configuration file: `swiftlys2/configs/k4-weaponpurchase.jsonc`
 
 Each weapon entry supports:
 
-| Option        | Description                              | Required |
-| ------------- | ---------------------------------------- | -------- |
-| `Aliases`     | List of command aliases (without prefix) | Yes      |
-| `CustomPrice` | Override default weapon price            | No       |
+| Option         | Description                                      | Required |
+| -------------- | ------------------------------------------------ | -------- |
+| `Aliases`      | List of command aliases (without prefix)         | Yes      |
+| `CustomPrice`  | Override default weapon price                    | No       |
+| `AllowedMaps`  | List of maps where weapon is available (whitelist) | No       |
+| `DisabledMaps` | List of maps where weapon is disabled (blacklist)  | No       |
+| `AllowedTeams` | List of teams that can use weapon (`T`, `CT`, or empty for both) | No       |
+
+**Restriction Logic:**
+- **AllowedMaps** (Whitelist): If set, weapon is ONLY available on listed maps
+  - ⚠️ **PRIORITY**: If `AllowedMaps` is set, `DisabledMaps` is IGNORED
+  - Use when you want explicit control over where weapon is available
+- **DisabledMaps** (Blacklist): If set, weapon is blocked on listed maps, allowed everywhere else
+  - Only applies if `AllowedMaps` is NOT set
+  - Use when weapon should be available everywhere except specific maps
+- **AllowedTeams**: If set, weapon is ONLY available for listed teams (values: `T`, `CT`)
+  - Empty or not set = available for both teams
+- **Best Practice**: Don't use `AllowedMaps` and `DisabledMaps` together (AllowedMaps takes priority)
+- All map and team names are case-insensitive
 
 Example configuration:
 
@@ -93,8 +110,35 @@ Example configuration:
 {
   "K4WeaponPurchase": {
     "Weapons": {
+      // No restrictions - available everywhere for everyone
       "weapon_ak47": { "Aliases": ["ak47", "ak"] },
-      "weapon_awp": { "Aliases": ["awp"], "CustomPrice": 5000 },
+
+      // Blacklist example - AWP disabled on specific competitive maps
+      "weapon_awp": {
+        "Aliases": ["awp"],
+        "CustomPrice": 5000,
+        "DisabledMaps": ["de_dust2", "de_mirage"]
+      },
+
+      // Whitelist example - Negev ONLY available on fun maps
+      "weapon_negev": {
+        "Aliases": ["negev"],
+        "AllowedMaps": ["aim_map", "fy_poolday"]
+      },
+
+      // Team restriction - Deagle only for Terrorists
+      "weapon_deagle": {
+        "Aliases": ["deagle"],
+        "AllowedTeams": ["T"]
+      },
+
+      // Combined restrictions - Scout only for CT on specific maps
+      "weapon_ssg08": {
+        "Aliases": ["ssg", "scout"],
+        "AllowedMaps": ["de_nuke", "de_train"],
+        "AllowedTeams": ["CT"]
+      },
+
       "weapon_healthshot": { "Aliases": ["healthshot"], "CustomPrice": 500 }
     },
     "CheckBuyZone": true,

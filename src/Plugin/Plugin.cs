@@ -67,6 +67,38 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 		// Nothing to clean up
 	}
 
+	private bool IsWeaponAllowedOnCurrentMap(WeaponConfig weaponConfig)
+	{
+		var currentMap = Core.ConVar.Find<string>("host_map")?.Value?.ToLowerInvariant() ?? string.Empty;
+
+		// If AllowedMaps is set and not empty, weapon is only available on those maps
+		if (weaponConfig.AllowedMaps != null && weaponConfig.AllowedMaps.Count > 0)
+		{
+			return weaponConfig.AllowedMaps.Any(map =>
+				map.Equals(currentMap, StringComparison.OrdinalIgnoreCase));
+		}
+
+		// If DisabledMaps is set and not empty, weapon is disabled on those maps
+		if (weaponConfig.DisabledMaps != null && weaponConfig.DisabledMaps.Count > 0)
+		{
+			return !weaponConfig.DisabledMaps.Any(map =>
+				map.Equals(currentMap, StringComparison.OrdinalIgnoreCase));
+		}
+
+		// Default: allowed on all maps
+		return true;
+	}
+
+	private static bool IsWeaponAllowedForTeam(WeaponConfig weaponConfig, Team team)
+	{
+		// If AllowedTeams is not set or empty, weapon is available for both teams
+		if (weaponConfig.AllowedTeams == null || weaponConfig.AllowedTeams.Count == 0)
+			return true;
+
+		var teamName = team == Team.T ? "T" : team == Team.CT ? "CT" : string.Empty;
+		return weaponConfig.AllowedTeams.Any(t => t.Equals(teamName, StringComparison.OrdinalIgnoreCase));
+	}
+
 	private void OnPurchaseCommand(ICommandContext ctx, string className)
 	{
 		var player = ctx.Sender;
@@ -102,6 +134,21 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 			return;
 		}
 
+		// Check map restrictions
+		var weaponConfig = Config.CurrentValue.Weapons[className];
+		if (!IsWeaponAllowedOnCurrentMap(weaponConfig))
+		{
+			player.SendChat($" {localizer["k4.general.prefix"]} {localizer["k4.weaponpurchase.map_restricted"]}");
+			return;
+		}
+
+		// Check team restrictions
+		if (!IsWeaponAllowedForTeam(weaponConfig, controller.Team))
+		{
+			player.SendChat($" {localizer["k4.general.prefix"]} {localizer["k4.weaponpurchase.team_restricted"]}");
+			return;
+		}
+
 		// Get weapon data
 		var weaponIndex = Core.Helpers.GetDefinitionIndexByClassname(className);
 		if (!weaponIndex.HasValue)
@@ -118,7 +165,6 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 		}
 
 		// Get price (custom or default from game data)
-		var weaponConfig = Config.CurrentValue.Weapons[className];
 		var price = weaponConfig.CustomPrice ?? weaponData.Price;
 
 		// Check money

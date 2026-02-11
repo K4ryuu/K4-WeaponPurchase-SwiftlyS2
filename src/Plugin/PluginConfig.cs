@@ -70,4 +70,7 @@ public sealed class WeaponConfig
 {
 	public List<string> Aliases { get; set; } = [];
 	public int? CustomPrice { get; set; }
+	public List<string>? AllowedMaps { get; set; }
+	public List<string>? DisabledMaps { get; set; }
+	public List<string>? AllowedTeams { get; set; } // CT, T, or empty for both
 }
