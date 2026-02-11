@@ -12,7 +12,7 @@ namespace K4WeaponPurchase;
 
 [PluginMetadata(
 	Id = "k4.weaponpurchase",
-	Version = "1.0.1",
+	Version = "1.1.0",
 	Name = "K4 - Weapon Purchase",
 	Author = "K4ryuu",
 	Description = "Purchase weapons, grenades and more through commands"
