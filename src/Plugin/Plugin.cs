@@ -43,9 +43,21 @@ public sealed partial class Plugin(ISwiftlyCore core) : BasePlugin(core)
 
 		foreach (var (className, weaponConfig) in Config.CurrentValue.Weapons)
 		{
-			foreach (var alias in weaponConfig.Aliases)
+			if (weaponConfig.Aliases.Count == 0)
+				continue;
+
+			var mainCommand = weaponConfig.Aliases[0];
+			var aliases = weaponConfig.Aliases.Skip(1).ToList();
+
+			if (string.IsNullOrWhiteSpace(mainCommand))
+				return;
+
+			Core.Command.RegisterCommand(mainCommand, ctx => OnPurchaseCommand(ctx, className));
+
+			foreach (var alias in aliases)
 			{
-				Core.Command.RegisterCommand(alias, ctx => OnPurchaseCommand(ctx, className));
+				if (!string.IsNullOrWhiteSpace(alias))
+					Core.Command.RegisterCommandAlias(mainCommand, alias);
 			}
 		}
 	}
